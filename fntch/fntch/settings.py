@@ -9,21 +9,31 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import sys
+
 from pathlib import Path
 from celery.schedules import crontab
 import json
 import os
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-#ROOT_DIR = os.path.dirname(BASE_DIR)
-SECRETS_PATH = os.path.join(BASE_DIR, 'secret.json')
-secrets = json.loads(open(SECRETS_PATH).read())
+secret_file = os.path.join(BASE_DIR, 'secret.json')
 
-for key, value in secrets.items():
-    setattr(sys.modules[__name__], key, value)
+with open(secret_file) as f:
+    secrets = json.loads(f.read())
 
-SECRET_KEY = "DJANG0_SECRET_KEY" #get_secret("DJANG0_SECRET_KEY")
+
+def get_secret(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+
+SECRET_KEY = get_secret("DJANG0_SECRET_KEY")
 
 DEBUG = True
 
@@ -79,9 +89,9 @@ WSGI_APPLICATION = 'fntch.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': "DB_NAME", #get_secret("DB_NAME"),
+        'NAME': get_secret("DB_NAME"),
         'USER': 'root',
-        'PASSWORD': '1234',#'DB_PASSWORD",#get_secret("DB_PASSWORD"),
+        'PASSWORD': get_secret("DB_PASSWORD"),
         'HOST': 'localhost',
         'PORT': '3306'
     }
