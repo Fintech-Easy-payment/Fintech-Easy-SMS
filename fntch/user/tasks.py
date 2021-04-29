@@ -1,8 +1,6 @@
 from __future__ import absolute_import, unicode_literals
-
 import logging
 from pathlib import Path
-
 from celery import shared_task, Celery
 from .models import *
 import datetime
@@ -35,17 +33,17 @@ def get_secret(setting, secrets=secrets):
 def send_sms():
     try:
         for up in UserProduct.objects.all():
-            user = up.user_id
-            product = up.product_id
-            exr_date = up.exr_date.strftime("%Y년 %m월 %d일")
-            now = datetime.datetime.today().strftime("%Y년 %m월 %d일")
-            # 만료일 임박 (-7일)이면 메세지 보내기
-            # before_one_week = datetime.datetime.today() - datetime.timedelta(weeks=1)
-            # before_one_week = before_one_week.strftime("%Y년 %m월 %d일")
-            # if exr_date == before_one_week :
-            # TODO: 시간 설정
-            if exr_date == now:
+            user = User.objects.get(user_id = up.user_id)
 
+            product = Product.objects.get(product_id = up.product_id)
+
+            exr_date = up.exr_date.strftime("%Y년 %m월 %d일")
+
+            before_one_week = up.exr_date - datetime.timedelta(weeks=1)
+            before_one_week = before_one_week.strftime("%Y년 %m월 %d일")
+
+            now = datetime.datetime.today().strftime("%Y년 %m월 %d일")
+            if before_one_week == now:
                 payment_url = "http://localhost:3000/payment?uid=" + str(user.user_id) + "&product=" + str(
                     product.product_id)
 
@@ -54,8 +52,8 @@ def send_sms():
                 message2 = "다음 링크로 간편 연장하세요! {}" \
                     .format(payment_url)
 
-                sms.apply_async((user.phone, message1))
                 sms.apply_async((user.phone, message2))
+                sms.apply_async((user.phone, message1))
                 logger.info("send_sms to" + str(user.phone))
     except Exception as e:
         logger.error("send sms error >> " + str(e))
@@ -68,7 +66,6 @@ def sms(mem_phone, message):
         uri = "/sms/v2/services/" + get_secret("NCP_SMS_SERVICE_ID") + "/messages"
         api_url = url + uri
         timestamp = str(int(time.time() * 1000))
-        # access_key = "1BPrH9LWILPXROyKPaLJ"
         string_to_sign = "POST " + uri + "\n" + timestamp + "\n" + get_secret("NCP_ACCESS_KEY")
         signature = make_signature(string_to_sign)
 

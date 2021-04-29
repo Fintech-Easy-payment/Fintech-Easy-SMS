@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'django_celery_results',
+    'rest_framework',
     'user'
 ]
 
@@ -86,13 +87,16 @@ WSGI_APPLICATION = 'fntch.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': get_secret("DB_NAME"),
-        'USER': 'root',
-        'PASSWORD': get_secret("DB_PASSWORD"),
-        'HOST': 'localhost',
+        'NAME': get_secret('DB_NAME'),
+        'USER': get_secret('USERNAME'),
+        'PASSWORD': get_secret('DB_PASSWORD'),
+        'HOST': get_secret('HOST'),
         'PORT': '3306'
     }
 }
