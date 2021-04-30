@@ -34,18 +34,15 @@ def send_sms():
     try:
         for up in UserProduct.objects.all():
             user = User.objects.get(user_id = up.user_id)
-
             product = Product.objects.get(product_id = up.product_id)
-
             exr_date = up.exr_date.strftime("%Y년 %m월 %d일")
-
             before_one_week = up.exr_date - datetime.timedelta(weeks=1)
             before_one_week = before_one_week.strftime("%Y년 %m월 %d일")
 
             now = datetime.datetime.today().strftime("%Y년 %m월 %d일")
             if before_one_week == now:
-                payment_url = "http://localhost:3000/payment?uid=" + str(user.user_id) + "&product=" + str(
-                    product.product_id)
+
+                payment_url = "https://finextend.herokuapp.com/"
 
                 message1 = "안녕하세요 {}님! 이용중인 {} 만료일은 {} 입니다." \
                     .format(user.name, product.product_name, exr_date)

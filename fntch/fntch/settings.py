@@ -111,11 +111,13 @@ CELERY_TIMEZONE = 'Asia/Seoul'
 
 CELERY_BEAT_SCHEDULE = {
     'task-send-sms': {
-        'task': 'user.tasks.send_sms',  # 실행함수
+        'task': 'user.tasks.send_sms',
         'schedule': crontab(minute='*/5')
+
     },
 }
 
+# 'schedule': crontab(minute='0', hour='8')
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
